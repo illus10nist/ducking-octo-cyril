@@ -113,7 +113,16 @@ The problem of dynamic resource allocation has been widely researched in the are
 
 \section{Problem Setting}
 
-\begin{table}[ht]
+
+We consider an indoor environment in which $ n$ people move throughout a ground plane that is discretised into cells.  At most one person can occupy each cell at a time. We want to track the people using a wide field of view, calibrated, omni-directional camera. The camera is mounted on the ceiling facing the ground plane, with the camera axis perpendicular to the ground plane.
+
+The \emph{state} of the world is described by a vector $\mathbf{X}$ of length $n$, where each $X_i$ is a binary variable indicating whether cell $i$ is occupied. $|\mathbf{X}| $ is the total number of cells. 
+
+For each cell, the projection of the shape of a person in the image can be approximated by a rectangular window. This rectangular sub-image or \emph{window} at cell $ i $ is represented by $ I_{i} $. The windows are extracted and evaluated by a \emph{detector}. The quality of the overal perception depends on the subset of the cells to which the detector is applied and the location of the people in the environment.
+
+Our goal maintain a posterior distribution or \emph{belief} over $\mathbf{X}$.  While the background subtraction detector can be applied to all windows, computational constraints allow us to apply the parts-based detector to only $K < |\mathbf{X}|$ windows.  Therefore, in the next section, we propose a framework for accurately and efficiently maintaining a belief over $\mathbf{X}$ by making smart choices about the $K$ windows to which we apply the parts-based detector.  Table \ref{tab:Formal symbols} summarizes the notation used to describe the problem setting.
+
+\begin{table}[ht] 
   \begin{tabular}{lll}
    \hline
    Symbol & Explanation \\
@@ -129,20 +138,10 @@ The problem of dynamic resource allocation has been widely researched in the are
    \hline
   \end{tabular}
   \caption{%
-    Symbols.
+    Problem setting notation. \sw{This table is out of date and contains notation that was not introduced in the text.}
   }
   \label{tab:Formal symbols}
 \end{table}
-
-
-An indoor environment is considered in our work. $ n$ People are assumed to move on the ground plane of this environment. The ground plane is discretised into cells. Each of the cells can occupy at most one person at a time. We want to track the people using a wide field of view, calibrated, omni directional camera. The camera is mounted on the ceiling facing the ground plane, with the camera axis perpendicular to the ground plane.
-
-The location of all the people in the environment is the true \textit{state} of the world. This is represented by  \textbf{X} which stands for the true occupancy of all the cells. \textbf{X} consists of state features $X_{i}$, which represents the true occupancy of one cell $ i$. Each $X_{i}$ can take a binary value depending on the occupancy. $|\textbf{X}| $ is the total number of cells. 
-
-For any given cell, the projection of the shape of a person in the image can be approximated by a rectangular window. This rectangular window or the \textit{sub-image} at cell $ i $ is represented by $ I_{i} $. The sub-images (windows) are extracted and evaluated by a detection algorithm (detector). The quality of perception depends on the subset of the cells to which the detector is applied and also on the location of the people in the environment.
-
-We are interested in an estimate of state $\textbf{X}$, which can be computed from a \textit{belief} over the location of the people: the posterior distribution over the states.
-The computational constraint allows us to process all the windows for the background based model, but it allows us only to process $ K $ windows of the parts based detector. The goal of this work is to develop a framework for smart selection of the $K$ windows and and to use the detector output at these windows to compute an accurate belief about $\textbf{X}$.
 
 \section{Proposed framework}
 
