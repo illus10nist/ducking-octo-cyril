@@ -85,11 +85,11 @@ Existing state-of-the-art systems typically use either a  detection by backgroun
 
 Methods based on background subtraction~\cite{bk1}~\cite{bk2-bayesian} are computationally inexpensive and can be used in an online setting. Nevertheless, they are inaccurate when used in real environments. Background based methods can only detect people when they are in motion. This is a major difficulty in using them in environments where people are involved in stationary activities. Moreover, while background-based methods are good at dealing with the large variety of poses and appearances of the foreground (people), they do not provide us with a principled way to interpret this foreground: it is very hard for the algorithm to work out which parts of the foreground are actually touching the ground, and therefore to map the observations in the image domain to the world domain.
 
-Detection by classification framework uses a model of the foreground. These detectors are generally more accurate in real world environments, but are computationally expensive for an online setting. They can model the overall shape of the person~\cite{dalaltriggs} as well as individual body parts~\cite{DPM}~\cite{partsDeva}. The accuracy of these detectors vary largely based on the granularity at which the shape of a human is abstracted. In real world environments, the use of a body parts based model can provide good accuracy, but at a very high computational cost.
+Detection by classification framework uses a model of the foreground. These detectors are generally more accurate than background based methods, but are computationally expensive for an online setting. They can model the overall shape of the person~\cite{dalaltriggs} as well as individual body parts~\cite{DPM}~\cite{partsDeva}. Sophisticated part based models can provide robust detection in real world environments but at a very high computational cost. This restricts the use of such part based models in online settings.
 
 In this paper, we present a new approach for multi-person detection that gets the best of both worlds.  In particular, it approaches the accuracy of part-based detectors but with much lower computational costs.  Furthermore, because it can obey hard computational constraints while making efficient use of whatever computational resources are available, it is ideally suited to on-line settings.
 
-The main idea is to quantify the system's uncertainty about people's locations and use this to make smart choices about where to apply the expensive parts based detector.  In the off-line phase, we learn observation models for each detector that estimate the probability of detection given people's true locations.  In the on-line phase, we apply the background based detector to all the images collected by the cameras and, using its observation model, compute a posterior distribution over people's locations.  Then, using this posterior and the observation model for the parts based detector, we select a subset of the windows in all the images that are estimated to maximize \emph{information gain}.  We then apply the parts baesd detector only to this subset and use the resulting detections to compute a second posterior, from which final predictions about people's locations can be made.  By making smart choices about where to apply the expensive detector, this method can achieve high accuracy at much lower computational cost.  In addition, since it works with window subsets of any size, it can easily be tuned to meet hard computational constraints.  
+The main idea is to quantify the system's uncertainty about people's locations and use this to make smart choices about where to apply the expensive parts based detector.  In the off-line phase, we learn observation models for each detector that estimate the probability of detection given people's true locations.  In the on-line phase, we apply the background based detector to the whole image collected by the camera, using its observation model, compute a posterior distribution over people's locations.  Then, using this posterior and the observation model for the parts based detector, we select a subset of the windows in all the images that are estimated to maximize \emph{information gain}.  We then apply the parts baesd detector only to this subset and use the resulting detections to compute a second posterior, from which final predictions about people's locations can be made.  By making smart choices about where to apply the expensive detector, this method can achieve high accuracy at much lower computational cost.  In addition, since it works with window subsets of any size, it can easily be tuned to meet hard computational constraints.  
 
 We evaluated our method on a real-world dataset gathered from a multi-camera system consisting of \sw{add details.}  Our results show that our method performs nearly as well as, but is much faster than, a standard parts based detector.  In addition, it substantially outperforms baselines that use only background based detectors or that naively combined both the detectors.
 
@@ -117,14 +117,13 @@ The problem of dynamic resource allocation has been widely researched in the are
    \hline
    Symbol & Explanation \\
    \hline
-   $C $ & Number of cameras\\
    $\textbf{G} $ & Number of cells\\
    %$G_{c} $ & Set of all cells visible from camera $c$.\\
-   $ \textbf{I}^{c} $ & Raw input image from camera $ c$\\
-   $ I_{i}^{c} $ & Raw image at location (Window) $ i$\\
+   $ \textbf{I} $ & Raw input image from camera.\\
+   $ I_{i} $ & Raw image at location (Window) $ i$\\
    %$ W_{i}^{c} $ & Window at location $ i$\\
-   $ \textbf{O} $ & Observation map - Classifier output for all  $ i $, $ c $\\
-   $O^{c}_{i} $& Detector output for groundplane location $ i $\\
+   $ \textbf{O} $ & Observation map - Classifier output for all  $ i $\\
+   $O_{i} $& Detector output for all $ i $\\
    $\textbf{X}$& True state (occupied/not occupied) for all $i$\\
    \hline
   \end{tabular}
@@ -135,13 +134,14 @@ The problem of dynamic resource allocation has been widely researched in the are
 \end{table}
 
 
-An indoor environment is considered in our work. $ n$ People are assumed to move on the ground plane of this environment. The ground plane is discretised into cells. Each of the cells can occupy at most one person at a time. We want to track the people using $ k $ wide field of view, calibrated, omni directional cameras. The cameras are mounted on the ceiling facing the ground plane, with the camera axis perpendicular to the ground plane. Each camera $ c $ observes a subset of the total cells.
+An indoor environment is considered in our work. $ n$ People are assumed to move on the ground plane of this environment. The ground plane is discretised into cells. Each of the cells can occupy at most one person at a time. We want to track the people using a wide field of view, calibrated, omni directional camera. The camera is mounted on the ceiling facing the ground plane, with the camera axis perpendicular to the ground plane.
 
-The location of all the people in the environment is the true state of the world. This is represented by  \textbf{X} which stands for the true occupancy of all the cells. \textbf{X} consists of state features $X_{i}$, which represents the true occupancy of one cell $ i$. Each $X_{i}$ can take a binary value depending on the occupancy. $|\textbf{X}| $ is the total number of cells. The quality of perception depends on the subset of the cells observed by the camera and also on the location of the people in the environment.
+The location of all the people in the environment is the true \textit{state} of the world. This is represented by  \textbf{X} which stands for the true occupancy of all the cells. \textbf{X} consists of state features $X_{i}$, which represents the true occupancy of one cell $ i$. Each $X_{i}$ can take a binary value depending on the occupancy. $|\textbf{X}| $ is the total number of cells. 
 
-For any given cell, the projection of the shape of a person in the image can be approximated by a rectangular window. This rectangular window or the sub-image at cell $ i $ from camera $ c$ is represented by $ I^{c}_{i} $. The sub-images (windows) are extracted and evaluated by a detection algorithm (detector). An action represents the selection of one of these windows as input to the detector.
+For any given cell, the projection of the shape of a person in the image can be approximated by a rectangular window. This rectangular window or the \textit{sub-image} at cell $ i $ is represented by $ I_{i} $. The sub-images (windows) are extracted and evaluated by a detection algorithm (detector). The quality of perception depends on the subset of the cells to which the detector is applied and also on the location of the people in the environment.
 
-The computational constraint allows us to process all the windows for the background based model, but it allows us only to process $ K $ windows of the parts based detector. The goal of this work was to develop a framework for computing accurate belief about $\textbf{X}$ using the background detector output and the part based detector output for the selected $K$ windows.
+We are interested in an estimate of state $\textbf{X}$, which can be computed from a \textit{belief} over the location of the people: the posterior distribution over the states.
+The computational constraint allows us to process all the windows for the background based model, but it allows us only to process $ K $ windows of the parts based detector. The goal of this work is to develop a framework for smart selection of the $K$ windows and and to use the detector output at these windows to compute an accurate belief about $\textbf{X}$.
 
 \section{Proposed framework}
 
@@ -153,20 +153,28 @@ The computational constraint allows us to process all the windows for the backgr
 \label{fig:Block dia}
 \end{figure*}
 
-As explained in the previous section, we are interested in an estimate of the state $\textbf{X}$ which can be computed from the belief about the state $\textbf{X}$. For computing an accurate belief, an iterative coarse to fine state estimation process is proposed in our work. The system which is illustrated in figure 1 works in an online setting. The offline trained components of the system are first explained and then the online process is described.
+As explained in the previous section, we are interested in an estimate of the state $\textbf{X}$ which can be computed from the belief about the state $\textbf{X}$. The whole framework has two phases: an offline phase and an online phase. The offline trained components of the system are first explained and then the online process is described.
 
-\subsection{Detector}
-We use a template based background subtraction detector as well as an articulated flexible mixture of parts model.
-
-\dv{Write about background model}
-
-26 part flexible mixture of parts model has been used for the parts based detector. More details of the model parameters used is described in the experiments section.
+ \subsection{Offline learning}
  
-\subsection{Offline learning}
- The uncertainity of both the background based detector and the parts based detector is quantified using an observation model. Labelled multi-person data is used to learn this observation model. This model considers the effect of occlusion between people on the detector output. The model is described in section 5.
+ \subsubsection{Detectors}
+We study the use of two contrasting detectors. The first one is a background based detector and the second one is a parts based detector.
+
+A template based probabilistic model is used as the background based detector\cite{englebienneFast}. It works in real time and has a grid based approach which makes it suitable for our setting.
+
+We have used the the non articulated flexible mixture of parts model\cite{partsDeva} for the parts based detector. Specifically, a 26 part model of the human body which uses small, non-oriented parts is used.
+More details of the model parameters used is described in the experiments section.
+
+\subsubsection{Observation model}
+In order to compute a meaningful belief about the state, we need to learn an observation model which will quantify the uncertainity in the detector output for different state configurations. An observation model correlates the output of the detector $O_{i}$ to different world states $\textbf{X}$.
+We learn this observation model from data for both the background based detector and the parts based detector.
 \subsection{Online sequential process}
-At time $t $, an image is acquired from the camera. The background based detecor is applied on all the locations in the image. The detector output from the background based detector is used to create an observation map. An observation map is the detector output for all cells in the ground plane.  The next step is estimating belief about the state of the world using sampling. Using the observation map and the learnt observation model for the background based detector, we compute a coarse belief about the location of the people in the world (state) using MCMC sampling.
-Now, based on our computational budget, we have multiple \emph{intra time steps} over which we re-estimate our belief. 
+The online process consists of two main steps for estimating the belief. First is the \textit{coarse belief computation} and the second is \textit{fine belief computation}. The online process is represented in figure \ref{fig:Block dia}.
+At time $t $, an image is acquired from the camera. The background based detector is applied on all the locations in the image. The detector output from the background based detector is used to create an \textit{observation map}, $\textbf{O}$. An observation map is the detector output for all cells in the ground plane.  
+
+The next step is the coarse belief computation. Using the observation map and the learnt observation model for the background based detector, we compute a coarse belief about the location of the people in the world (state) using MCMC sampling.
+Once we have estimated a coarse belief, we perform the fine belief computation using this belief as a prior.
+For the fine belief computation, based on our computational budget, we have multiple \emph{intra time steps} over which we re-estimate our belief. 
 At the first intra time step, using this estimated state and information gain as objective function, we compute the most informative window location.
 We apply the parts based detector in this window and fold in the detector output of the parts based detector for a more accurate belief.
 Iteratively at each of the next $K-1$ intra time steps, we pick the most informative window and improve the belief about the location.
@@ -174,28 +182,40 @@ Iteratively at each of the next $K-1$ intra time steps, we pick the most informa
 The different modules invovled in the system is explained in detail in the following sections.
 
 \section{Observation model}
-In order to compute a meaningful belief about the state, we need to learn an observation model which will quantify the uncertainity in the detector output for different state configurations. 
-An observation model will correlate the output of the detector $O^{c}_{i}$ to different world states $\textbf{X}$.
-From labelled ground truth data and the detector output for all the locations we learn the probability distribution $ P(\textbf{O}|\textbf{X})  $ of
-obtaining an observation from the detector $ O^{c}_{i} $ ( that a grid cell is occupied or not occupied), given the true location of all the people in the environment(the true state of the world $\textbf{X}$).
+From labelled multi person data and the detector output for all the locations we learn the probability distribution $ P(\textbf{O}|\textbf{X})  $ of
+obtaining an observation from the detector $ O^{c}_{i} $ (that a grid cell is occupied or not occupied), given the true location of all the people in the environment(the true state of the world $\textbf{X}$).
 
 \subsection{Factorization}
 
 The observation model will have very high dimensionality if represented in the naive form. In order to learn a meaningful representation from available data, it would be beneficial to reduce the dimensionality of this observation model.
 We can consider that the observations from each grid cell are independent of one another conditioned on the true state.
 \begin{align}
-P(\textbf{O}|\textbf{X})&=\prod_{c,i} {P(O_{i}^{c}|\textbf{X})}
+P(\textbf{O}|\textbf{X})&=\prod_{i} {P(O_{i}|\textbf{X})}
 \end{align}
-Next we could reduce the dimensionality of state space if we consider only a neighbourhood around $ X_{i} $, instead of the whole occupancy $\textbf{X} $. A neighbourhood for cell $i$ is defined as the set of cells which overlap with the cell $i$, when their corresponding windows are considered in the image. The detector output of a window at location $ i $ is only affected by its own occupancy and a neighbourhood of windows which overlaps with the window at $ i$. This approximation can be represented as follows: 
+Next we reduce the dimensionality of state space if we consider only a \textit{neighbourhood} around $ X_{i} $, instead of the whole occupancy $\textbf{X} $. A neighbourhood for cell $i$ is defined as the set of cells which overlap with the cell $i$, when their corresponding windows are considered in the image. The detector output of a window at location $ i $ is only affected by its own occupancy and a neighbourhood of cells which overlaps with the cell at $ i$. This approximation can be represented as follows: 
 \begin{align}
-  P(\obs|\state) &= \prod_{c,i} \, P(O_{i}^{c}|X_{i},X_{n_{c}(i)})
+  P(\obs|\state) &= \prod_{i} \, P(O_{i}|X_{i},X_{n(i)})
 \end{align}
-We now need to compute  $ P(O_{i}^{c}|X_{i},X_{n_{c(i)}}) $. Depending on the values that $ X_{i} $, $ X_{n_{c(i)}} $ can take we have four distinct scenarios of occupancy. In the next subsection we will explain how to model the observation model in terms of state features for these scenarios.
+We now need to learn  $ P(O_{i}|X_{i},X_{n(i)}) $. Depending on the values that $ X_{n(i)} $ can take, we have three distinct scenarios of occupancy. In the next subsection we will explain how to model the features of the state that the observation model conditions on, for these three scenarios of occupancy.
 
 \subsection{Feature representation}
-As mentioned above, depending on the occupancy of a cell $i$ and its neighbours, we have four scenarios of occupancy. In order to explain these four configurations, it is first necessary to explain how the niegbhourhood occupancies are computed.
 
-Based on the neighbourhood occupancy, we can have three distinct cases : empty neighbourhood, single person in the nieghbourhood and multiple people in the neighbourhood. If there are multiple people in the neighbourhood, we compute the maximally overlapped neighbour and approximate that the effect of the nieghbourhood on the detector output can be modelled sufficiently accurately using this maximally ovelapped neighbour and ignoring other occupancies of the neighbours. The maximally occupied neighbour $ \textbf{J}_{i} $ is computed as :
+As mentioned above, based on the neighbourhood occupancy, we can have three distinct cases : vacant neighbourhood, single person in the nieghbourhood and multiple people in the neighbourhood. Let us consider each of the three cases seperately.
+Using a feature transformation function, we convert the the occupancy scenarios to a binary feature. This is explained for each of the scenarios.
+
+\paragraph{Vacant neighbourhood} When the neighbourhood is empty, and when the cell is also not occupied, we have a probablity for false positives.
+\begin{align}
+ P(O_{i} |X_{i}=0 ,f(X_{n(i)}) =0)  &=\mu^{0}_{0}
+\end{align}
+
+In case when a cell is occupied, the probability of detection computed as:
+\begin{align}
+ P(O_{i} |X_{i}=1 ,f(X_{n(i)}) =0)  &=\mu^{0}_{1}
+\end{align}
+The functions $ \mu^{0}_{0} $  and $ \mu^{0}_{1} $ is learnt from training data.
+
+
+If there are multiple people in the neighbourhood, we compute the maximally overlapped neighbour and approximate that the effect of the nieghbourhood on the detector output can be modelled sufficiently accurately using this maximally ovelapped neighbour and ignoring other occupancies of the neighbours. The maximally occupied neighbour $ \textbf{J}_{i} $ is computed as :
 
 \begin{align}
  \textbf{J}_{i}^{c} = \operatorname*{arg\,max}_{j\in n_{c(i)},X_{j}=1} \Vert I_{i}^{c}\cap I_{j}^{c} \Vert  
@@ -226,16 +246,6 @@ The impact of occlusion is different when a neighbour is in front of a cell rath
 \end{align}
 Now based on these two features, we need to learn the distribution over the possible observations for the four different occupancy configurations.  
 
-When the neighbourhood is empty, and when the cell is also not occupied, we have a probablity for false positives.
-\begin{align}
- P(O^{c}_{i} |X_{i}=0 ,\forall j \in{n_{c(i)}},X_{j} =0)  &=\mu^{0}_{0}
-\end{align}
-
-In case when a cell is occupied, the probability of detection computed as:
-\begin{align}
- P(O^{c}_{i} |X_{i}=1 ,\forall j \in{n_{c(i)}},X_{j} =0)  &=\mu^{0}_{1}
-\end{align}
-The functions $ \mu^{0}_{0} $  and $ \mu^{0}_{1} $ is learnt from training data.
 
 Let us consider that one of the neighbours of $ i$ is occupied. This occupancy affects the classifier response at $ i$. The $\beta$ and $\gamma$ parameters described can model this appropriately.
  \begin{align}
@@ -404,7 +414,7 @@ Tracking is evaluated using multi object detector accuracy and multi object dete
 \section{Conclusion and Future work}
 {\small
 \bibliographystyle{ieee}
-\bibliography{iccvbib.bib}
+\bibliography{iccvbib}
 }
 
 \end{document}
