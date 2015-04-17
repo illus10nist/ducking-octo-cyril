@@ -117,10 +117,9 @@ Problem setting notation. \sw{This table is out of date and contains notation th
 \end{figure*}
 Our framework consists of two phases. In the \emph{off-line phase}, the detectors and their corresponding observation functions are trained. In the \emph{on-line phase}, a belief about $\mathbf{X}$ is iteratively updated using observations gathered from applying the background subtraction detector to all windows and applying the parts-based detector a carefully selected subset of the windows.
 \subsection{Offline Phase}
-Our system uses two detectors: a background subtraction detector and a parts-based detector. The background subtraction detector is a template-based probabilistic model \cite{englebienneFast} \sw{broken ref} that works in real time and has a grid-based approach making it suitable for our setting. The parts-based detector uses the non-articulated flexible mixture of parts model \cite{partsDeva} with a 26-part model of the human body using small, non-oriented parts.
+Our system uses two detectors: a background subtraction detector and a parts-based detector. The background subtraction detector is a template-based probabilistic model \cite{englebienne2010fast} \sw{broken ref} that works in real time and has a grid-based approach making it suitable for our setting. The parts-based detector uses the non-articulated flexible mixture of parts model \cite{partsDeva} with a 26-part model of the human body using small, non-oriented parts.
 More details on the detectors are provided in Section \ref{sec:exp}.
 Maintaining a belief about $\mathbf{X}$ requires observation functions for each detector. These observation functions specify, for each possible $O_i$ and $\mathbf{X}$, the probability that the detector produces $O_i$ when the true state is $\mathbf{X}$. In the offline phase, we learn these observation functions from labeled data. The observation functions are described in more detail in Section \ref{sec:obs}.
-
 \subsection{Online Phase}
 The online process consists of two main steps for estimating the belief. First is the \textit{coarse belief computation} and the second is \textit{fine belief computation}. The online process is represented in figure \ref{fig:Block dia}.
 At time $t $, an image is acquired from the camera. The background based detector is applied on all the locations in the image. The detector output from the background based detector is used to create an \textit{observation map}, $\textbf{O}$. An observation map is the detector output for all cells in the ground plane.
@@ -132,9 +131,10 @@ We apply the parts based detector in this window and fold in the detector output
 Iteratively at each of the next $K-1$ intra time steps, we pick the most informative window and improve the belief about the location.
 The different modules invovled in the system is explained in detail in the following sections.
 \section{Observation model} \label{sec:obs}
-From labelled multi person data and the detector output for all the locations we learn the probability distribution $ P(\textbf{O}|\textbf{X})  $ of
+From labelled multi person data and the detector output for all the locations we learn the probability distribution $ P(\textbf{O}|\textbf{X}) $ of
 obtaining an observation from the detector $ O^{c}_{i} $ (that a grid cell is occupied or not occupied), given the true location of all the people in the environment(the true state of the world $\textbf{X}$).
 \subsection{Factorization}
+
 The observation model will have very high dimensionality if represented in the naive form. In order to learn a meaningful representation from available data, it would be beneficial to reduce the dimensionality of this observation model.
 We can consider that the observations from each grid cell are independent of one another conditioned on the true state.
 \begin{align}
@@ -147,6 +147,7 @@ Next we reduce the dimensionality of state space if we consider only a \textit{n
 We now need to learn  $ P(O_{i}|X_{i},X_{n(i)}) $. Depending on the values that $ X_{n(i)} $ can take, we have three distinct scenarios of occupancy. In the next subsection we will explain how to model the features of the state that the observation model conditions on, for these three scenarios of occupancy.
 
 \subsection{Feature representation}
+
 As mentioned above, based on the neighbourhood occupancy, we can have three distinct cases : vacant neighbourhood, single person in the nieghbourhood and multiple people in the neighbourhood. Let us consider each of the three scenarios seperately.
 Using a feature transformation function, we convert the the occupancy scenarios to a binary feature. This is explained for each of the scenarios.
 
@@ -370,7 +371,7 @@ H^{k}(\textbf{X}| a)\approx -\dfrac{1}{N}\sum_{\underline{a}\in\lbrace 0 ,1 \rbr
 \textbf{Note} :
 For each of the action to be evaluated at an intra-time step, we have three set of samples. One set of samples from the previous intra time step, and two sets of samples for the current intra time step, one set for $\underline{a}=1$ and another for $\underline{a}=0$ (fictious update).
   
-\section{Experimentation} \label{sec:exp}
+\section{Experimentation}\label{sec:exp}
 
 \textbf{Data currently available}\\ 
 Two sequences (single camera) multi person(three people). 1500 labelled windows in each data set. One sequence will be used for learning the observation model and tuning the detectors.The other sequence will be used for testing the performance of our system.\\
