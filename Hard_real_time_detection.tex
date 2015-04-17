@@ -157,18 +157,12 @@ Our framework consists of two phases.   In the \emph{off-line phase}, the detect
 
 \subsection{Offline Phase}
  
- \subsubsection{Detectors}
-We study the use of two contrasting detectors. The first one is a background based detector and the second one is a parts based detector.
+Our system uses two detectors: a background subtraction detector and a parts-based detector.  The background subtraction detector is a template-based probabilistic model \cite{englebienneFast} \sw{broken ref} that works in real time and has a grid-based approach making it suitable for our setting.  The parts-based detector uses the non-articulated flexible mixture of parts model \cite{partsDeva} with a 26-part model of the human body using small, non-oriented parts.
+More details on the detectors are provided in Section \ref{sec:exp}.
 
-A template based probabilistic model is used as the background based detector\cite{englebienneFast}. It works in real time and has a grid based approach which makes it suitable for our setting.
+Maintaining a belief about $\mathbf{X}$ requires observation functions for each detector.  These observation functions specify, for each possible $O_i$ and $\mathbf{X}$, the probability that the detector produces $O_i$ when the true state is $\mathbf{X}$.  In the offline phase, we learn these observation functions from labeled data.  The observation functions are described in more detail in Section \ref{sec:obs}.
 
-We have used the the non articulated flexible mixture of parts model\cite{partsDeva} for the parts based detector. Specifically, a 26 part model of the human body which uses small, non-oriented parts is used.
-More details of the model parameters used is described in the experiments section.
-
-\subsubsection{Observation model}
-In order to compute a meaningful belief about the state, we need to learn an observation model which will quantify the uncertainity in the detector output for different state configurations. An observation model correlates the output of the detector $O_{i}$ to different world states $\textbf{X}$.
-We learn this observation model from data for both the background based detector and the parts based detector.
-\subsection{Online sequential process}
+\subsection{Online Phase}
 The online process consists of two main steps for estimating the belief. First is the \textit{coarse belief computation} and the second is \textit{fine belief computation}. The online process is represented in figure \ref{fig:Block dia}.
 At time $t $, an image is acquired from the camera. The background based detector is applied on all the locations in the image. The detector output from the background based detector is used to create an \textit{observation map}, $\textbf{O}$. An observation map is the detector output for all cells in the ground plane.  
 
@@ -181,7 +175,7 @@ Iteratively at each of the next $K-1$ intra time steps, we pick the most informa
 
 The different modules invovled in the system is explained in detail in the following sections.
 
-\section{Observation model}
+\section{Observation model} \label{sec:obs}
 From labelled multi person data and the detector output for all the locations we learn the probability distribution $ P(\textbf{O}|\textbf{X})  $ of
 obtaining an observation from the detector $ O^{c}_{i} $ (that a grid cell is occupied or not occupied), given the true location of all the people in the environment(the true state of the world $\textbf{X}$).
 
@@ -388,7 +382,7 @@ H^{k}(\textbf{X}| a)\approx -\dfrac{1}{N}\sum_{\underline{a}\in\lbrace 0 ,1 \rbr
 \textbf{Note} :
 For each of the action to be evaluated at an intra-time step, we have three set of samples. One set of samples from the previous intra time step, and two sets of samples for the current intra time step, one set for $\underline{a}=1$ and another for $\underline{a}=0$ (fictious update).
   
-\section{Experimentation}
+\section{Experimentation} \label{sec:exp}
 
 \textbf{Data currently available}\\ 
 Two sequences (single camera) multi person(three people). 1500 labelled windows in each data set. One sequence will be used for learning the observation model and tuning the detectors.The other sequence will be used for testing the performance of our system.\\
