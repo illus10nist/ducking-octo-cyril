@@ -110,9 +110,9 @@ Problem setting notation. \sw{This table is out of date and contains notation th
 \section{Proposed Framework}
 \begin{figure*}
 \begin{center}
-\includegraphics[width=12cm]{img/newBlockdia.jpg}
+\includegraphics[width=12cm]{img/blockdia.png}
 \end{center}
-\caption{A schematic diagram of the proposed active data fusion system}
+\caption{A schematic diagram of the proposed system}
 \label{fig:Block dia}
 \end{figure*}
 Our framework consists of two phases. In the \emph{off-line phase}, the detectors and their corresponding observation functions are trained. In the \emph{on-line phase}, a belief about $\mathbf{X}$ is iteratively updated using observations gathered from applying the background subtraction detector to all windows and applying the parts-based detector a carefully selected subset of the windows.
@@ -372,21 +372,38 @@ H^{k}(\textbf{X}| a)\approx -\dfrac{1}{N}\sum_{\underline{a}\in\lbrace 0 ,1 \rbr
 For each of the action to be evaluated at an intra-time step, we have three set of samples. One set of samples from the previous intra time step, and two sets of samples for the current intra time step, one set for $\underline{a}=1$ and another for $\underline{a}=0$ (fictious update).
   
 \section{Experimentation}\label{sec:exp}
-
-\textbf{Data currently available}\\ 
-Two sequences (single camera) multi person(three people). 1500 labelled windows in each data set. One sequence will be used for learning the observation model and tuning the detectors.The other sequence will be used for testing the performance of our system.\\
-
-\textbf{Systems to evaluate}\\
-1. Dalal and Triggs\\ 
-2. Naive Parts Based\\ 
-3. Dalal and Triggs + Naive parts based (all windows) - \\
-4. Dalal and Triggs + Naive parts based (Random windows)\\
-5. Dalal and Triggs + Naive parts based (Sampling from prior)\\
-6. Dalal and Triggs + Naive parts based (Pruned windows - proposed method)\\
- 
-
-\textbf{Evaluation procedure}\\
-Tracking is evaluated using multi object detector accuracy and multi object detector precision.
+We evaluated the system by comparing the precision,recall and runtime of the proposed method to the precision,recall and runtime of the background based detector and the parts based detector.
+\subsection{Dataset}
+Two multi person datasets were used to test our system. Both the datasets were collected from an omni-directional camera mounted on the ceiling perpendicular to the groundplane. The images acquired are of resolution 1024*972. An indoor environment of dimensions 5m by 12.5m was used for collecting the data. 
+\subsection{Results} 
+\begin{table}[ht]
+  \begin{tabular}{llll}
+    \hline
+    \textbf{Background detector}\\  
+    \hline
+    Dataset & Recall & Precision & Runtime(sec)\\
+    \hline
+ 	1 & 0.63 & 0.74 & 0.05\\
+ 	2 & 0.58 &0.71 & 0.05 \\
+   \hline
+   \textbf{Parts detector}\\
+   \hline
+   Dataset & Recall & Precision & Runtime(sec)\\
+    \hline
+ 	1 & 0.74 & 0.77 & 35\\
+ 	2 & 0.71 & 0.72 & 35 \\
+   \hline   
+   \textbf{Our method}\\
+   \hline
+   Dataset & Recall & Precision & Runtime(sec)\\
+   \hline   
+ 	1 & 0.70 & 0.75 & x\\
+ 	2 & 0.68 & 0.71 & x\\
+   \hline   
+  \end{tabular}
+  \caption{Results}
+  \label{tab:Results}
+\end{table}
 
 \section{Discussion}
 \section{Conclusion and Future work}
